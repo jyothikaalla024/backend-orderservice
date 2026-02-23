@@ -22,7 +22,7 @@ COPY . .
  
 # Expose container port
 
-EXPOSE 5000
+EXPOSE 5002
  
 # Start the app
 
