@@ -7,20 +7,30 @@ const app = express();
 const PORT = 5002;  // Force port 5002
 
 // ========== CORS ==========
+const allowedOrigins = [
+  "https://amznpro.online",
+  "https://www.amznpro.online",
+  "http://localhost:3000",
+  "http://127.0.0.1:3000"
+];
+
 app.use(cors({
-  origin: [
-    'https://amznpro.online',
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',
-    'http://127.0.0.1:5500',
-    'http://localhost:5500',
-    'http://127.0.0.1:8080',
-    'http://localhost:8080'
-  ],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true); // allow Postman / curl
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
+// handle preflight properly
+app.options("*", cors());
 app.use(express.json());
 
 // ========== DATABASE TEST ==========
