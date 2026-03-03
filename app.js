@@ -13,9 +13,12 @@ const PORT = process.env.PORT || 5002;
 app.use(express.json());
 
 app.use(cors({
-
-  origin: process.env.FRONTEND_URL || "https://amznpro.online",
-
+  origin: [
+    "https://amznpro.online",
+    "http://amznpro.online"
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
 }));
  
 // Connect to DB
