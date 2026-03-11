@@ -39,7 +39,7 @@ app.use(express.json());
     await db.query("SELECT 1");
     console.log("✅ MySQL Database connected (Order Service)");
   } catch (err) {
-    console.error("❌ MySQL connection failed:", err.message);
+    console.error("❌ MySQL connection failed:", err);
   }
 })();
 
