@@ -36,16 +36,13 @@ app.use(express.json());
 // ========== DATABASE TEST ==========
 (async () => {
   try {
-await db.pool.query("SELECT 1");
+    await db.query("SELECT 1");
+    console.log("✅ MySQL Database connected (Order Service)");
+  } catch (err) {
+    console.error("❌ MySQL connection failed:", err.message);
+  }
+})();
 
-
-const [rows] = await db.pool.query("SELECT * FROM orders");
-
-// Insert order
-const [result] = await db.pool.query(
-  "INSERT INTO orders (user_id, product_name, amount) VALUES (?, ?, ?)",
-  [user_id, product_name, amount]
-);
 // ========== ROUTES ==========
 
 // Get all orders
