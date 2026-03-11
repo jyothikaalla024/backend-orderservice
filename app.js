@@ -4,15 +4,18 @@ const cors = require("cors");
 const db = require("./db");   // make sure this exports pool.promise()
 
 const app = express();
-const PORT = 5002;
+const PORT = 5002;  // Force port 5002
 
 // ========== CORS ==========
+// 👇 Add all possible frontend origins here (including HTTPS variants if you use HTTPS locally)
 const allowedOrigins = [
   "https://amznpro.online",
   "https://www.amznpro.online",
   "http://localhost:3000",
-  "http://127.0.0.1:3000"
-  // Add your frontend's origin here if different
+  "https://localhost:3000",        // if you enable HTTPS for frontend
+  "http://127.0.0.1:3000",
+  "https://127.0.0.1:3000"         // if you enable HTTPS for frontend
+  // Add your development origin if different (e.g., "http://localhost:5173" for Vite)
 ];
 
 app.use(cors({
@@ -35,7 +38,13 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
-// Handle preflight properly
+// 👇 Add Private Network Access header (required for requests from public sites to local network)
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Private-Network', 'true');
+  next();
+});
+
+// handle preflight properly
 app.options("*", cors());
 app.use(express.json());
 
