@@ -1,10 +1,10 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const db = require("./db");   // make sure this uses mysql2/promise
+const db = require("./db");   // make sure this exports pool.promise()
 
 const app = express();
-const PORT = 5002;  // Force port 5002
+const PORT = 5002;
 
 // ========== CORS ==========
 const allowedOrigins = [
@@ -12,15 +12,21 @@ const allowedOrigins = [
   "https://www.amznpro.online",
   "http://localhost:3000",
   "http://127.0.0.1:3000"
+  // Add your frontend's origin here if different
 ];
 
 app.use(cors({
   origin: function (origin, callback) {
+    // Log the origin for debugging
+    console.log(`Request origin: ${origin}`);
+
     if (!origin) return callback(null, true); // allow Postman / curl
 
     if (allowedOrigins.includes(origin)) {
+      console.log(`CORS allowed for origin: ${origin}`);
       return callback(null, true);
     } else {
+      console.log(`CORS blocked for origin: ${origin}`);
       return callback(new Error("Not allowed by CORS"));
     }
   },
@@ -29,7 +35,7 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
-// handle preflight properly
+// Handle preflight properly
 app.options("*", cors());
 app.use(express.json());
 
@@ -56,7 +62,7 @@ app.get("/orders", async (req, res) => {
   }
 });
 
-// Create new order (Optional but recommended)
+// Create new order
 app.post("/orders", async (req, res) => {
   const { user_id, product_name, amount } = req.body;
 
