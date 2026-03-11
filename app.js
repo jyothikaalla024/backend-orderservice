@@ -47,7 +47,8 @@ app.use((req, res, next) => {
 // handle preflight properly
 app.options("*", cors());
 app.use(express.json());
-
+const compression = require('compression');
+app.use(compression());
 // ========== DATABASE TEST ==========
 (async () => {
   try {
