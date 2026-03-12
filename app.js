@@ -14,39 +14,40 @@ const allowedOrigins = [
   "https://www.amznpro.online",
   "https://api.amznpro.online",
   "http://localhost:3000",
-  "https://localhost:3000",
   "http://127.0.0.1:3000",
-  "https://127.0.0.1:3000"
+  "http://localhost:5500",
+  "http://127.0.0.1:5500"
 ];
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      console.log("Request Origin:", origin);
+const corsOptions = {
+  origin: function (origin, callback) {
+    console.log("Request Origin:", origin);
 
-      if (!origin) return callback(null, true);
+    // allow server-to-server or Postman
+    if (!origin) return callback(null, true);
 
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      } else {
-        return callback(new Error("CORS not allowed for this origin"));
-      }
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"]
-  })
-);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
 
-app.options("*", cors());
+    console.warn("❌ CORS blocked for:", origin);
+    return callback(null, false); // safer than throwing error
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+};
+
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions)); // handle preflight
 
 // ================= MIDDLEWARE =================
 app.use(express.json());
 app.use(compression());
 
-// Private Network Access Header
+// Allow private network access (Chrome requirement sometimes)
 app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Private-Network", "true");
+  res.header("Access-Control-Allow-Private-Network", "true");
   next();
 });
 
@@ -64,16 +65,14 @@ app.get("/health", (req, res) => {
 });
 
 // ================= DATABASE TEST =================
-async function testDB() {
+(async () => {
   try {
     await db.query("SELECT 1");
     console.log("✅ MySQL Database connected (Order Service)");
   } catch (error) {
     console.error("❌ MySQL connection failed:", error.message);
   }
-}
-
-testDB();
+})();
 
 // ================= ROUTES =================
 
@@ -112,6 +111,12 @@ app.post("/orders", async (req, res) => {
     console.error("ORDER CREATE ERROR:", error.message);
     res.status(500).json({ error: "Database error" });
   }
+});
+
+// ================= GLOBAL ERROR HANDLER =================
+app.use((err, req, res, next) => {
+  console.error("SERVER ERROR:", err.message);
+  res.status(500).json({ error: "Internal server error" });
 });
 
 // ================= START SERVER =================
