@@ -3,7 +3,9 @@ const express = require("express");
 const cors = require("cors");
 const compression = require("compression");   // 👈 NEW
 const db = require("./db");
-
+app.get("/", (req, res) => {
+  res.send("Order Service is running");
+});
 const app = express();
 const PORT = 5002;
 
